@@ -95,7 +95,7 @@ def combine_masks(processed_folder):
     files = glob.glob(os.path.join(processed_mask_folder, '*.png'))
     cam2, cam3, cam4 = get_mask_files(files)
 
-    for e,i in enumerate(cam2):
+    for e, i in enumerate(cam2):
         im2 = misc.imread(i)[:,:,0]
         im3 = misc.imread(cam3[e])[:,:,0]
         im4 = misc.imread(cam4[e])[:,:,0]
