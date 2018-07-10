@@ -61,7 +61,7 @@ Using these building blocks, the entire network is built as follows:
 ![Neural Network Diagram][network]
 
 * The first encoder block has `depth` of 16, while the second has `depth` 32, to extract features successively.
-* The 1x1 convolution with `depth` 16 and batch normalization is used to extract features from encoder, while reducing depth and preserving spatial information.
+* The 1x1 convolution of `depth` 16 with batch normalization and dropout is used to extract features from encoder, while reducing depth and preserving spatial information.
 * The first decoder block has concatenation with first encoder block, and has `depth` of 32.
 * The second decoder block has concatenation with input, and has `depth` of 16.
 * Lastly, the decoder is convoluted with `kernel size` 3 and activated by `softmax`, to give a layer of `depth` 3, which is the number of categories (background, other people, target people).
@@ -154,4 +154,4 @@ Patrolling and target is seen:
 
 ### Demo video of Follow Me
 
-A demo video of executing the task of following is provided in this [youtube link]().
+A demo video of executing the task of following is provided at this [youtube link](https://youtu.be/ktDXhRLbAQY).
