@@ -14,6 +14,7 @@
 [encoder block]: misc_images/encoder_block.png
 [decoder block]: misc_images/decoder_block.png
 [network]: misc_images/network.png
+[model]: misc_images/model.png
 [final grade score]: misc_images/final_grade_score.png
 [loss graph]: misc_images/loss_graph.png
 
@@ -61,13 +62,17 @@ Using these building blocks, the entire network is built as follows:
 ![Neural Network Diagram][network]
 
 * The 3 encoder block has `depth` of 32, 64 and 128 respectively, to extract features successively.
-* The 1x1 convolution of `depth` 128 with batch normalization and dropout is used to extract features from encoder, while reducing depth and preserving spatial information.
+* The 1x1 convolution of `depth` 128 with batch normalization and dropout is used to extract features from encoder, while preserving spatial information.
 * The first decoder block has no concatenation, and has `depth` of 128.
 * The second decoder block has concatenation with first encoder block, and has `depth` of 64.
 * The third decoder block has concatenation with input, and has `depth` of 32.
 * Lastly, the decoder is convoluted with `kernel size` 3 and activated by `softmax`, to give a layer of `depth` 3, which is the number of categories (background, other people, target people).
 
-* 
+An image of the model generated using keras is attached below for completeness:
+
+![Model Image][model]
+
+To allow the network to generalize to situations, additional data were collected using the simulator for various scenarios. In the end, ~24,000 training images were used.
 
 #### 3. The write-up conveys the student's understanding of the parameters chosen for the the neural network.
 
@@ -86,7 +91,7 @@ A loss graph of the training process is attached here:
 
 #### 4. The student has a clear understanding and is able to identify the use of various techniques and concepts in network layers indicated by the write-up.
 
-A comparison of 1x1 convolution and fully connected layer is written here:
+A comparison of 1x1 convolution and fully connected layer is discussed here:
 
 **1x1 convolution:**
  * 1x1 convolution is just a regular convolution where kenel size = 1, and stride = 1. 
@@ -103,13 +108,13 @@ A comparison of 1x1 convolution and fully connected layer is written here:
 
 The task of this project is semantic segmentation, i.e. labeling each pixel of image by the category it belongs.
 
-The network is constructed as a encoder - deocoder structure with bypass connections between them.
+The network is constructed as a encoder - deocoder structure with skip connections between them.
 
 Encoder is used to extract features relevant of the task, such as lines, shapes, objects, successively.
 
 Decoder then takes these features and reconstruct the proper classification for each pixels.
 
-Bypass connections between encoder and decoder are used, because as the features are extracted in encoder, spatial information is condensed and fine details in the image are lost. Bypass connections would provide previous layers' information where details are preserved to the later construction of categories for pixels.
+Skip connections between encoder and decoder are used, because as the features are extracted in encoder, spatial information is condensed and fine details in the image are lost. Skip connections would provide previous layers' information where details are preserved to the later construction of categories for pixels.
 
 #### 6. The student displays a solid understanding of the limitations to the neural network with the given data chosen for various follow-me scenarios which are conveyed in the write-up.
 
@@ -125,7 +130,7 @@ The model and its weights are saved in `data/weights/` as `config_follow_me_mode
 
 #### 2. The neural network must achieve a minimum level of accuracy for the network implemented.
 
-This final score is:
+The final score is:
 
 ![Final Grade Score image][final grade score]
 
@@ -133,7 +138,7 @@ This final score is:
 
 * One important limitation of the project is that it is coded in a way that is specific for a single task. In the future, the project could be extended where new target objects could be added easily.
 
-* As can be seen by the score, and in the below example segmentations, the trained model is still far from perfect. To improve it, more amount and more diverse data could be collected, and then more complex neural network model could be constructed.
+* As can be seen by the score, and in the example segmentations below, the trained model is still far from perfect. To improve it, more amount and more diverse data could be collected, and then more complex neural network model could be constructed.
 
 * Another enhancement is to apply the model to real world images, such that the segmentation could be used by actual cameras, and possibly by real drones. An obstacle to this is obtaining ground truth segmentations.
 
