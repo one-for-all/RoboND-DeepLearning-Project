@@ -14,6 +14,7 @@
 [encoder block]: misc_images/encoder_block.png
 [decoder block]: misc_images/decoder_block.png
 [network]: misc_images/network.png
+[model]: misc_images/model.png
 [final grade score]: misc_images/final_grade_score.png
 [loss graph]: misc_images/loss_graph.png
 
@@ -44,7 +45,7 @@ Firstly, some building blocks are defined here:
 
  * The separable convolution has a `stride` of 2, `kernel size` of 3, `relu` activation, to reduce the dimension of next layer by half, and extract features.
  * Batch normalization is used to normalize input to each layer, to help with training, and help tackle overfitting.
- * The dropout has a `keep rate` of 0.5 to tackle overfitting.
+ * The dropout has a `drop rate` of 0.5 to tackle overfitting.
 
 **Decoder Block**
 
@@ -54,26 +55,34 @@ Firstly, some building blocks are defined here:
 * Next, the upsampled layer are concatenated with a previous layer to gather fine-grained information from previous features.
 * Another separable convolution with `stride` of 1, `kernel size` of 3, `relu` activation, is applied to extract new features from the concatenated layers.
 * Batch normalization is again applied to normalize input to next layer.
-* Dropout with `keep rate` of 0.5 is applied to tackle overfitting.
+* Dropout with `drop rate` of 0.5 is applied to tackle overfitting.
 
 Using these building blocks, the entire network is built as follows:
 
 ![Neural Network Diagram][network]
 
-* The first encoder block has `depth` of 16, while the second has `depth` 32, to extract features successively.
-* The 1x1 convolution of `depth` 16 with batch normalization and dropout is used to extract features from encoder, while reducing depth and preserving spatial information.
-* The first decoder block has concatenation with first encoder block, and has `depth` of 32.
-* The second decoder block has concatenation with input, and has `depth` of 16.
+* The 3 encoder block has `depth` of 32, 64 and 128 respectively, to extract features successively.
+* The 1x1 convolution of `depth` 128 with batch normalization and dropout is used to extract features from encoder, while preserving spatial information.
+* The first decoder block has no concatenation, and has `depth` of 128.
+* The second decoder block has concatenation with first encoder block, and has `depth` of 64.
+* The third decoder block has concatenation with input, and has `depth` of 32.
 * Lastly, the decoder is convoluted with `kernel size` 3 and activated by `softmax`, to give a layer of `depth` 3, which is the number of categories (background, other people, target people).
+
+An image of the model generated using keras is attached below for completeness:
+
+![Model Image][model]
+
+To allow the network to generalize to situations, additional data were collected using the simulator for various scenarios. In the end, ~24,000 training images were used.
 
 #### 3. The write-up conveys the student's understanding of the parameters chosen for the the neural network.
 
 The hyper-parameters are fine-tuned by training the network and observing the evolution of training loss and validation loss.
 
-* Epoch = 30, because the validation loss has stopped decreasing at around this number.
-* Learning Rate = 0.01, the training loss is able to drop fast enough with this learning rate, and learning rate higher than this would make the converged training loss higher, while learning rate lower than this does not provide significant reduction in training loss.
-* Batch Size = 128, because the AWS machine is able to fit this number of batches in memory, and lower batch size would decrease training speed.
+* Epoch = 11, because the validation loss has stopped decreasing significantly at around this number.
+* Learning Rate = 0.001, the training loss is able to drop fast enough with this learning rate, and learning rate higher than this would make the converged training loss higher, while learning rate lower than this does not provide significant reduction in training loss.
+* Batch Size = 16, because although low batch size would decrease training speed, we found that small batch size was able to help tackle the overfitting problem.
 * Steps Per Epoch = total number of training images / batch size, so that about every image has a chance to be trained in each epoch.
+* validation_steps = total number of validation images / batch size, so that the entire validation set is utilized to give more accurate validation score.
 * Number of workers used in training = 4, because the AWS machine has 4 cores.
 
 A loss graph of the training process is attached here:
@@ -82,7 +91,7 @@ A loss graph of the training process is attached here:
 
 #### 4. The student has a clear understanding and is able to identify the use of various techniques and concepts in network layers indicated by the write-up.
 
-A comparison of 1x1 convolution and fully connected layer is written here:
+A comparison of 1x1 convolution and fully connected layer is discussed here:
 
 **1x1 convolution:**
  * 1x1 convolution is just a regular convolution where kenel size = 1, and stride = 1. 
@@ -99,13 +108,13 @@ A comparison of 1x1 convolution and fully connected layer is written here:
 
 The task of this project is semantic segmentation, i.e. labeling each pixel of image by the category it belongs.
 
-The network is constructed as a encoder - deocoder structure with bypass connections between them.
+The network is constructed as a encoder - deocoder structure with skip connections between them.
 
 Encoder is used to extract features relevant of the task, such as lines, shapes, objects, successively.
 
 Decoder then takes these features and reconstruct the proper classification for each pixels.
 
-Bypass connections between encoder and decoder are used, because as the features are extracted in encoder, spatial information is condensed and fine details in the image are lost. Bypass connections would provide previous layers' information where details are preserved to the later construction of categories for pixels.
+Skip connections between encoder and decoder are used, because as the features are extracted in encoder, spatial information is condensed and fine details in the image are lost. Skip connections would provide previous layers' information where details are preserved to the later construction of categories for pixels.
 
 #### 6. The student displays a solid understanding of the limitations to the neural network with the given data chosen for various follow-me scenarios which are conveyed in the write-up.
 
@@ -121,7 +130,7 @@ The model and its weights are saved in `data/weights/` as `config_follow_me_mode
 
 #### 2. The neural network must achieve a minimum level of accuracy for the network implemented.
 
-This final score is:
+The final score is:
 
 ![Final Grade Score image][final grade score]
 
@@ -129,7 +138,7 @@ This final score is:
 
 * One important limitation of the project is that it is coded in a way that is specific for a single task. In the future, the project could be extended where new target objects could be added easily.
 
-* As can be seen by the score, and in the below example segmentations, the trained model is still far from perfect. To improve it, more amount and more diverse data could be collected, and then more complex neural network model could be constructed.
+* As can be seen by the score, and in the example segmentations below, the trained model is still far from perfect. To improve it, more amount and more diverse data could be collected, and then more complex neural network model could be constructed.
 
 * Another enhancement is to apply the model to real world images, such that the segmentation could be used by actual cameras, and possibly by real drones. An obstacle to this is obtaining ground truth segmentations.
 
