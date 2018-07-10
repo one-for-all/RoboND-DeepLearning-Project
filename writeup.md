@@ -44,7 +44,7 @@ Firstly, some building blocks are defined here:
 
  * The separable convolution has a `stride` of 2, `kernel size` of 3, `relu` activation, to reduce the dimension of next layer by half, and extract features.
  * Batch normalization is used to normalize input to each layer, to help with training, and help tackle overfitting.
- * The dropout has a `keep rate` of 0.5 to tackle overfitting.
+ * The dropout has a `drop rate` of 0.5 to tackle overfitting.
 
 **Decoder Block**
 
@@ -54,26 +54,30 @@ Firstly, some building blocks are defined here:
 * Next, the upsampled layer are concatenated with a previous layer to gather fine-grained information from previous features.
 * Another separable convolution with `stride` of 1, `kernel size` of 3, `relu` activation, is applied to extract new features from the concatenated layers.
 * Batch normalization is again applied to normalize input to next layer.
-* Dropout with `keep rate` of 0.5 is applied to tackle overfitting.
+* Dropout with `drop rate` of 0.5 is applied to tackle overfitting.
 
 Using these building blocks, the entire network is built as follows:
 
 ![Neural Network Diagram][network]
 
-* The first encoder block has `depth` of 16, while the second has `depth` 32, to extract features successively.
-* The 1x1 convolution of `depth` 16 with batch normalization and dropout is used to extract features from encoder, while reducing depth and preserving spatial information.
-* The first decoder block has concatenation with first encoder block, and has `depth` of 32.
-* The second decoder block has concatenation with input, and has `depth` of 16.
+* The 3 encoder block has `depth` of 32, 64 and 128 respectively, to extract features successively.
+* The 1x1 convolution of `depth` 128 with batch normalization and dropout is used to extract features from encoder, while reducing depth and preserving spatial information.
+* The first decoder block has no concatenation, and has `depth` of 128.
+* The second decoder block has concatenation with first encoder block, and has `depth` of 64.
+* The third decoder block has concatenation with input, and has `depth` of 32.
 * Lastly, the decoder is convoluted with `kernel size` 3 and activated by `softmax`, to give a layer of `depth` 3, which is the number of categories (background, other people, target people).
+
+* 
 
 #### 3. The write-up conveys the student's understanding of the parameters chosen for the the neural network.
 
 The hyper-parameters are fine-tuned by training the network and observing the evolution of training loss and validation loss.
 
-* Epoch = 30, because the validation loss has stopped decreasing at around this number.
-* Learning Rate = 0.01, the training loss is able to drop fast enough with this learning rate, and learning rate higher than this would make the converged training loss higher, while learning rate lower than this does not provide significant reduction in training loss.
-* Batch Size = 128, because the AWS machine is able to fit this number of batches in memory, and lower batch size would decrease training speed.
+* Epoch = 11, because the validation loss has stopped decreasing significantly at around this number.
+* Learning Rate = 0.001, the training loss is able to drop fast enough with this learning rate, and learning rate higher than this would make the converged training loss higher, while learning rate lower than this does not provide significant reduction in training loss.
+* Batch Size = 16, because although low batch size would decrease training speed, we found that small batch size was able to help tackle the overfitting problem.
 * Steps Per Epoch = total number of training images / batch size, so that about every image has a chance to be trained in each epoch.
+* validation_steps = total number of validation images / batch size, so that the entire validation set is utilized to give more accurate validation score.
 * Number of workers used in training = 4, because the AWS machine has 4 cores.
 
 A loss graph of the training process is attached here:
